@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: "config-server"
+
+
+  profiles:
+    #    configurations source:
+    #    git    = remote repository below (default)
+    #    native = config/ folder inside this project (run with SPRING_PROFILES_ACTIVE=native)
+    active: git
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: classpath:/config
+        git:
+          uri: https://github.com/rajputaadi/aadifoodie-config.git
+          default-label: main
+          timeout: 5
+          clone-on-start: true
+          force-pull: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+server:
+  port: 9096
+
+
+encrypt:
+  key: "adwgagvsargvdastbvasfaggsryresh"

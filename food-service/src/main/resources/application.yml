@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: "food-service"
+  config:
+    import: "configserver:http://localhost:9096/"
+  profiles:
+    active: prod
+  # load dummy data from data.sql after hibernate creates the tables
+  jpa:
+    defer-datasource-initialization: true
+  sql:
+    init:
+      mode: always
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+#    eureka configurations
+#database in important

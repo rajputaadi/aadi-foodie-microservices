@@ -1,0 +1,99 @@
+# Infrastructure for the foodie microservices:
+# mysql (+phpmyadmin), postgres (+pgadmin), rabbitmq, mongo (+mongo-express)
+#
+# Databases per service:
+#   restaurant-service        -> postgres  restaurantdb
+#   food-service              -> mysql     Fooddb
+#   user-service              -> mysql     jb2404
+#   cart-service              -> mysql     cartdb
+#   payement-delivery-service -> mysql     paymentdb
+# Tables are created by Hibernate (ddl-auto=update); dummy data is loaded by each
+# service's src/main/resources/data.sql on startup.
+
+services:
+
+  # MySQL Service
+  mysql-db:
+    image: mysql:8.4
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root1234
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+      - ./db-init/mysql:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot1234"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # phpMyAdmin for MySQL
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: phpmyadmin
+    environment:
+      PMA_HOST: mysql-db
+    ports:
+      - "8084:80"
+    depends_on:
+      - mysql-db
+
+  # PostgreSQL Service
+  postgres-db:
+    image: postgres:13
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: user123
+      POSTGRES_DB: restaurantdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d restaurantdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # pgAdmin for PostgreSQL
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "8082:80"
+    depends_on:
+      - postgres-db
+
+  # RabbitMQ for Spring Cloud Bus (config refresh)
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  # MongoDB Service
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./mongo-data:/data/db
+
+  # Mongo Express for MongoDB
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo-express
+    ports:
+      - "8083:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+    depends_on:
+      - mongo

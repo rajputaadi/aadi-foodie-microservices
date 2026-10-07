@@ -1,0 +1,11 @@
+# database volumes used by docker-compose (runtime data, not source)
+mysql-data/
+postgres-data/
+mongo-data/
+
+# IDE
+.idea/
+*.iml
+
+# build output
+target/
